@@ -6,31 +6,83 @@
 </head>
 <body>
 
-<script>
+<main>
+	<article>
+		<h1>PacketSync - game service packet synchronization for JS clients</h1>
+
+		<script>
+
+			require(
+				[
+					"Timeline"
+				],
+				function(
+					Timeline
+				) {
+					console.info("Timeline ok",Timeline);
+				}
+			);
+
+			require(
+				[
+					"TimeDataStore"
+				],
+				function(
+					TimeDataStore
+				) {
+					console.info("TimeDataStore ok",TimeDataStore);
+				}
+			);
+
+		</script>
+
+		<pre>
+Getting started:
 
 require(
 	[
-		"Timeline"
+		"http://spiderworm.github.io/packetsync/TimeDataStore.js",
+		"http://spiderworm.github.io/packetsync/Timeline.js"
 	],
 	function(
+		TimeDataStore,
 		Timeline
 	) {
-		console.info("Timeline ok",Timeline);
+
+
+		var store = new TimeDataStore(startTimestamp, startData);
+
+		var timeline = new Timeline(id, store, startTimestamp);
+
+		/*
+
+			Now, every time you receive updates from the service,
+			add those updates to the store.
+
+		*/
+
+		store.addUpdate(timestamp, update);
+
+
+		/*
+
+			The timeline will automatically start playing from the
+			startTimestamp you provided it.  You can get subscribe
+			to updates from the timeline:
+
+		*/
+
+		timeline.onNewData(function(data) {
+			// new data will be passed every animation frame
+			// handle new data here
+		});
+
 	}
 );
+		</pre>
 
-require(
-	[
-		"TimeDataStore"
-	],
-	function(
-		TimeDataStore
-	) {
-		console.info("TimeDataStore ok",TimeDataStore);
-	}
-);
-
-</script>
+	</article>
+</main>
 
 </body>
 </html>

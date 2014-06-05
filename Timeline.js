@@ -6,7 +6,6 @@ define(
 
 		function Timeline(id,timeDataStore,currentMS) {
 			EventObject.apply(this);
-			window.timelines.push(this);
 			this.id = id;
 			this._timeDataStore = timeDataStore;
 			this._currentMS = currentMS;
