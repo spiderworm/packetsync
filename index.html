@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+<title>PacketSync - game service packet synchronization for JS clients</title>
+<script src="require.js"></script>
+</head>
+<body>
+
+<script>
+
+require(
+	[
+		"Timeline"
+	],
+	function(
+		Timeline
+	) {
+		console.info("Timeline ok",Timeline);
+	}
+);
+
+require(
+	[
+		"TimeDataStore"
+	],
+	function(
+		TimeDataStore
+	) {
+		console.info("TimeDataStore ok",TimeDataStore);
+	}
+);
+
+</script>
+
+</body>
+</html>
