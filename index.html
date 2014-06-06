@@ -6,40 +6,111 @@
 </head>
 <body>
 
+<script>
+
+	require(
+		[
+			"Timeline"
+		],
+		function(
+			Timeline
+		) {
+			console.info("Timeline ok",Timeline);
+		}
+	);
+
+	require(
+		[
+			"TimeDataStore"
+		],
+		function(
+			TimeDataStore
+		) {
+			console.info("TimeDataStore ok",TimeDataStore);
+		}
+	);
+
+</script>
+
 <main>
 	<article>
-		<h1>PacketSync - game service packet synchronization for JS clients</h1>
 
-		<script>
+		<h1>PacketSync</h1>
+		<h2>game service packet synchronization for JavaScript clients</h2>
 
-			require(
-				[
-					"Timeline"
-				],
-				function(
-					Timeline
-				) {
-					console.info("Timeline ok",Timeline);
-				}
-			);
+		<section>
+			<h1>Why?</h1>
 
-			require(
-				[
-					"TimeDataStore"
-				],
-				function(
-					TimeDataStore
-				) {
-					console.info("TimeDataStore ok",TimeDataStore);
-				}
-			);
+			<p>
+				If you're building client-server game, your server will need to send packages of information to the client so that the client can display objects (such as ships, cars, people, etc) in the correct position.  A simple way to do this is for the server to send an initial packet of all the data in the game world that the client needs to know about, and follow that up with frequent packets containing only the updates to the data.
+			</p>
 
-		</script>
+			<p>
+<pre><code>// first packet service sends to client
+{
+	"cop": {
+		"x": 100,
+		"y": 10
+	},
+	"robber": {
+		"x": 120,
+		"y": 10
+	}
+}
 
-		<pre>
-Getting started:
+// from this point on, service sends updates to the client
 
-require(
+// cop moving towards robber
+{
+	"cop": {
+		"x": 105
+	}
+}
+
+{
+	"cop": {
+		"x": 110
+	}
+}
+
+// robber starts running from cop, cop gives chase
+{
+	"cop": {
+		"x": 115
+	},
+	"robber": {
+		"x": 125 // this is an update to the robber x coordinate that was sent in the initial packet
+	}
+}</code></pre>
+			</p>
+
+			<p>
+				The server will typically send packets very quickly, often more than 20 per second.  Because of this high frequency of packets, packets may arrive at the client out of order (or sometimes not arrive at all).  This can cause a jittery experience on the client, where the objects in the worlds stutter or shake, distracting the user from the true game experience.
+			</p>
+
+			<p>
+				PacketSync solves this problem by organizing packets as they come in, and interpolating between data points to smooth over data for the client experience when updates from the service have been lost or are infrequent.
+			</p>
+
+		</section>
+
+		<section>
+			<h1>Getting Started</h1>
+
+			<p>
+				There are two pieces you'll need to use PacketSync: the TimeDataStore, and the Timeline.
+			</p>
+
+			<p>
+				The TimeDataStore is where you are going to be storing the packets that come in from the service.
+			</p>
+
+			<p>
+				The Timeline will feed a continuous stream of data to your game.
+			</p>
+
+
+<pre><code>require(
 	[
 		"http://spiderworm.github.io/packetsync/TimeDataStore.js",
 		"http://spiderworm.github.io/packetsync/Timeline.js"
@@ -49,37 +120,48 @@ require(
 		Timeline
 	) {
 
+		/*
+			Create an instance of the TimeDataStore.  Give it a starting timestamp and initial data.
+			You can get your starting timestamp and data from the service, or give it a timestamp of 0
+			and an empty {} for start data.
+		*/
 
-		var store = new TimeDataStore(startTimestamp, startData);
-
-		var timeline = new Timeline(id, store, startTimestamp);
+		var store = new TimeDataStore(0, {});
 
 		/*
-
-			Now, every time you receive updates from the service,
-			add those updates to the store.
-
+			Every time the service sends an update, you will need to pass that update to the store,
+			along with the service's timestamp for that update.  Please note, this does require the
+			service provide timestamps along with all updates.
 		*/
 
 		store.addUpdate(timestamp, update);
 
+		/*
+			When you have an idea of what the service's current time is, you can create a Timeline.
+			It is recommended that your Timeline lage behind the service a certain amount to allow the
+			client to correct for lag, out of order packets, and that sort of thing.  A typical approach
+			is to lag 100 ms behind the service.  More information on the need to lag the client behind
+			the server can be found here:
+			https://developer.valvesoftware.com/wiki/Latency_Compensating_Methods_in_Client/Server_In-game_Protocol_Design_and_Optimization
+		*/
+
+		var timeline = new Timeline(id, store, serviceTimestamp - 100);
 
 		/*
-
-			The timeline will automatically start playing from the
-			startTimestamp you provided it.  You should subscribe
-			to updates from the timeline:
-
+			Now that you have created a Timeline, it will automatically be ready to start feeding data
+			to your game.  You will need to subscribe to the Timeline's data feed (prepare for a fire hose
+			of data, it will update you every animation frame).  You'll be able to use this data to
+			for example display your players and objects in the correct location in the world.
 		*/
 
 		timeline.onNewData(function(data) {
 			// new data will be passed every animation frame
-			// handle new data here
+			// do something with your new data here
+			// like draw your players on the screen in the right place or something
 		});
 
 	}
-);
-		</pre>
+);</code></pre>
 
 	</article>
 </main>
