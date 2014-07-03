@@ -1,8 +1,8 @@
 define(
 	[
-		'./TimeDataPoint',
-		'./util/clone',
-		'./util/interpolate'
+		'./TimeDataPoint.js',
+		'./util/clone.js',
+		'./util/interpolate.js'
 	],
 	function(
 		TimeDataPoint,

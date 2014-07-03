@@ -1,5 +1,5 @@
 define(
-	['./EventObject'],
+	['./EventObject.js'],
 	function(EventObject) {
 
 		window.timelines = [];

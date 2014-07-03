@@ -15,26 +15,70 @@
 
 <script>
 
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-var renderer = new THREE.CanvasRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+require(
+	[
+		"http://spiderworm.github.io/packetsync/TimeDataStore.js",
+		"http://spiderworm.github.io/packetsync/Timeline.js"
+	],
+	function(
+		TimeDataStore,
+		Timeline
+	) {
 
-var geometry = new THREE.CubeGeometry(1,1,1);
-var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-var cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
-camera.position.z = 5;
+		function Demo() {
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+			var renderer = new THREE.CanvasRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			this.__element = renderer.domElement;
 
-function render() { 
-	requestAnimationFrame(render);
-	cube.rotation.x += 0.001;
-	cube.rotation.y += 0.001;
-	renderer.render(scene, camera); 
-}
+			var geometry = new THREE.CubeGeometry(1,1,1);
+			var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+			var cube = new THREE.Mesh( geometry, material );
+			scene.add( cube );
+			camera.position.z = 5;
 
-render();
+			var service = new Demo.Service();
+			service.timeline.onNewData(function(data) {
+				console.info(data);
+			});
+
+			function render() { 
+				requestAnimationFrame(render);
+				cube.rotation.x += 0.001;
+				cube.rotation.y += 0.001;
+				renderer.render(scene, camera); 
+			}
+
+			render();
+		}
+		Demo.prototype = {
+			get element() {
+				return this.__element;
+			}
+		}
+
+
+
+
+		Demo.Service = function() {
+			this.__dataStore = new TimeDataStore(0,{});
+			this.__timeline = new Timeline("demo",this.__dataStore,-100);
+		}
+		Demo.Service.prototype = {
+			get timeline() {
+				return this.__timeline;
+			}
+		}
+
+
+
+
+		var demo = new Demo();
+		document.body.appendChild(demo.element);
+
+	}
+);
 
 </script>
 
